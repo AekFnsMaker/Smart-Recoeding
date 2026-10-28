@@ -7,6 +7,9 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-apk:
     name: Build Android Release APK
@@ -30,16 +33,41 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Ensure Android Scaffold & Permissions
+        run: |
+          # Backup custom AndroidManifest.xml before scaffold check
+          cp android/app/src/main/AndroidManifest.xml /tmp/AndroidManifest.xml.bak
+          flutter create . --org com.example --project-name speaker_tag_recorder --platforms=android
+          # Restore custom permissions and configuration
+          cp /tmp/AndroidManifest.xml.bak android/app/src/main/AndroidManifest.xml
+
       - name: Install Dependencies
         run: flutter pub get
 
       - name: Build Release APK
         run: flutter build apk --release
 
+      - name: Rename APK for Easy Download
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/SpeakerTagRecorder.apk
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SpeakerTagRecorder-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: SpeakerTagRecorder-APK
+          path: build/app/outputs/flutter-apk/SpeakerTagRecorder.apk
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30
+
+      - name: Create GitHub Release
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: "SpeakerTagRecorder v1.0.0 Release"
+          body: "Official Release APK for SpeakerTagRecorder Android App. Real-time speaker tagging and audio timestamp seek playback."
+          files: build/app/outputs/flutter-apk/SpeakerTagRecorder.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
