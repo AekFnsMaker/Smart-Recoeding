@@ -44,8 +44,12 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      - name: Analyze Dart Code
+        run: flutter analyze --no-fatal-infos
+
       - name: Build Release APK
-        run: flutter build apk --release
+        run: |
+          flutter build apk --release --verbose 2>&1 | tee build.log || (echo "=== GRADLE FAILURE LOG ===" && grep -i -E "error|exception|failure" build.log -B 2 -A 5 | head -n 100 && exit 1)
 
       - name: Prepare Artifact
         run: |
