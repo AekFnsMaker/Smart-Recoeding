@@ -40,8 +40,8 @@ jobs:
           rm -rf android
           flutter create . --org com.example --project-name speaker_tag_recorder --platforms=android
           
-          # Insert audio and storage permissions into standard generated manifest
           python3 -c '
+          # 1. Insert audio and storage permissions into AndroidManifest.xml
           with open("android/app/src/main/AndroidManifest.xml", "r") as f:
               content = f.read()
           perms = """
@@ -56,12 +56,15 @@ jobs:
           content = content.replace("<application", perms + "\n    <application", 1)
           with open("android/app/src/main/AndroidManifest.xml", "w") as f:
               f.write(content)
+
+          # 2. Set minSdk to 23 in android/app/build.gradle for record package compatibility
+          with open("android/app/build.gradle", "r") as f:
+              bg = f.read()
+          bg = bg.replace("minSdk = flutter.minSdkVersion", "minSdk = 23")
+          bg = bg.replace("minSdkVersion flutter.minSdkVersion", "minSdkVersion 23")
+          with open("android/app/build.gradle", "w") as f:
+              f.write(bg)
           '
-          
-          # Ensure minSdk is 23 for record package
-          echo "flutter.minSdkVersion=23" >> android/local.properties
-          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 23/g' android/app/build.gradle
-          sed -i 's/minSdkVersion = flutter.minSdkVersion/minSdkVersion = 23/g' android/app/build.gradle
 
       - name: Install Dependencies
         run: flutter pub get
@@ -87,9 +90,25 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          tail -n 150 build.log > build-failure.txt
+          python3 -c '
+          with open("build.log", "r", errors="ignore") as f:
+              lines = f.readlines()
+          idx = -1
+          for i, line in enumerate(lines):
+              if "BUILD FAILED" in line or "What went wrong" in line or "FAILURE:" in line:
+                  idx = i
+                  break
+          if idx != -1:
+              start = max(0, idx - 40)
+              end = min(len(lines), idx + 60)
+              out = "".join(lines[start:end])
+          else:
+              out = "".join(lines[-250:])
+          with open("build-failure.txt", "w") as f:
+              f.write(out)
+          '
           git add build-failure.txt
-          git commit -m "Auto: dump build failure log" || true
+          git commit -m "Auto: dump exact build failure reason" || true
           git push origin main || true
 
       - name: Prepare Artifact
