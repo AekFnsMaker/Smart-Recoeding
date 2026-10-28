@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
@@ -342,11 +343,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 // Slider
                 Slider(
                   value: position.inMilliseconds
-                      .clamp(0, maxDuration.inMilliseconds)
+                      .clamp(0, math.max(1, maxDuration.inMilliseconds))
                       .toDouble(),
-                  max: maxDuration.inMilliseconds > 0
-                      ? maxDuration.inMilliseconds.toDouble()
-                      : 1.0,
+                  max: math.max(1, maxDuration.inMilliseconds).toDouble(),
                   onChanged: (val) {
                     widget.audioService
                         .seekPlayback(Duration(milliseconds: val.toInt()));

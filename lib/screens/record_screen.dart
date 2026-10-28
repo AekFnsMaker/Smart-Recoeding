@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../services/audio_service.dart';
 import 'history_screen.dart';
 
@@ -143,12 +144,38 @@ class _RecordScreenState extends State<RecordScreen> {
     );
 
     if (!success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Microphone permission required to start recording.'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
+      final isPermDenied =
+          await widget.audioService.isPermissionPermanentlyDenied();
+      if (isPermDenied && mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Microphone Permission Required'),
+            content: const Text(
+                'Microphone permission is required to record meetings. Please enable it in Settings.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  openAppSettings();
+                },
+                child: const Text('Open Settings'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Microphone permission required to start recording.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
     }
   }
 
@@ -174,6 +201,12 @@ class _RecordScreenState extends State<RecordScreen> {
               );
             },
           ),
+        ),
+      );
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Recording stopped. No session file was created.'),
         ),
       );
     }

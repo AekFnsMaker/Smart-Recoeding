@@ -1,0 +1,15 @@
+# Flutter / Dart build artifacts
+.dart_tool/
+.packages
+build/
+*.apk
+*.aab
+
+# Android
+.gradle/
+local.properties
+*.keystore
+
+# System
+.DS_Store
+Thumbs.db

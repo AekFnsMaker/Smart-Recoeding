@@ -77,66 +77,104 @@ class AudioService extends ChangeNotifier {
 
   /// Checks and requests necessary audio recording permissions.
   Future<bool> checkAndRequestPermissions() async {
-    final status = await Permission.microphone.request();
-    if (!status.isGranted) {
+    try {
+      final hasPerm = await _audioRecorder.hasPermission();
+      if (hasPerm) return true;
+    } catch (_) {}
+
+    try {
+      final status = await Permission.microphone.request();
+      if (status.isGranted) return true;
+    } catch (_) {}
+
+    return false;
+  }
+
+  /// Checks if microphone permission was permanently denied by the user.
+  Future<bool> isPermissionPermanentlyDenied() async {
+    try {
+      final status = await Permission.microphone.status;
+      return status.isPermanentlyDenied;
+    } catch (_) {
       return false;
     }
-    return true;
   }
 
   /// Starts a new recording session.
   Future<bool> startRecording({String? sessionTitle}) async {
-    final hasPermission = await checkAndRequestPermissions();
-    if (!hasPermission) return false;
+    try {
+      final hasPermission = await checkAndRequestPermissions();
+      if (!hasPermission) return false;
 
-    // Reset recording session state
-    final appDir = await getApplicationDocumentsDirectory();
-    final now = DateTime.now();
-    final timestampStr = DateFormat('yyyyMMdd_HHmmss').format(now);
-    _currentSessionId = 'session_$timestampStr';
-    _sessionStartTime = now;
-    _elapsedMilliseconds = 0;
-    _activeTags.clear();
-    _activeSpeaker = null;
+      // Stop any active playback before recording
+      if (_playerState == PlayerState.playing) {
+        await stopPlayback();
+      }
 
-    final sessionDir = Directory(p.join(appDir.path, 'recordings'));
-    if (!await sessionDir.exists()) {
-      await sessionDir.create(recursive: true);
+      // Reset recording session state
+      final appDir = await getApplicationDocumentsDirectory();
+      final now = DateTime.now();
+      final timestampStr = DateFormat('yyyyMMdd_HHmmss').format(now);
+      _currentSessionId = 'session_$timestampStr';
+      _sessionStartTime = now;
+      _elapsedMilliseconds = 0;
+      _activeTags.clear();
+      _activeSpeaker = null;
+
+      final sessionDir = Directory(p.join(appDir.path, 'recordings'));
+      if (!await sessionDir.exists()) {
+        await sessionDir.create(recursive: true);
+      }
+
+      _currentAudioPath = p.join(sessionDir.path, '$_currentSessionId.m4a');
+
+      // Use standard AAC-LC encoder for high fidelity and universal device compatibility
+      const config = RecordConfig(
+        encoder: AudioEncoder.aacLc,
+        numChannels: 1,
+        bitRate: 128000,
+        sampleRate: 44100,
+      );
+
+      await _audioRecorder.start(config, path: _currentAudioPath!);
+
+      _recordingStatus = RecordingStatus.recording;
+      _startTimer();
+      notifyListeners();
+      return true;
+    } catch (e, stack) {
+      debugPrint('Error starting recording: $e\n$stack');
+      _recordingStatus = RecordingStatus.idle;
+      _ticker?.cancel();
+      notifyListeners();
+      return false;
     }
-
-    _currentAudioPath = p.join(sessionDir.path, '$_currentSessionId.m4a');
-
-    // Configure encoder for standard AAC in M4A container (clean, high compatibility)
-    const config = RecordConfig(
-      encoder: AudioEncoder.aacLc,
-      bitRate: 128000,
-      sampleRate: 44100,
-    );
-
-    await _audioRecorder.start(config, path: _currentAudioPath!);
-
-    _recordingStatus = RecordingStatus.recording;
-    _startTimer();
-    notifyListeners();
-    return true;
   }
 
   /// Pauses active recording.
   Future<void> pauseRecording() async {
-    if (_recordingStatus != RecordingStatus.recording) return;
-    await _audioRecorder.pause();
-    _ticker?.cancel();
-    _recordingStatus = RecordingStatus.paused;
-    notifyListeners();
+    try {
+      if (_recordingStatus != RecordingStatus.recording) return;
+      await _audioRecorder.pause();
+      _ticker?.cancel();
+      _recordingStatus = RecordingStatus.paused;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error pausing recording: $e');
+    }
   }
 
   /// Resumes recording from paused state.
   Future<void> resumeRecording() async {
-    if (_recordingStatus != RecordingStatus.paused) return;
-    await _audioRecorder.resume();
-    _recordingStatus = RecordingStatus.recording;
-    _startTimer();
-    notifyListeners();
+    try {
+      if (_recordingStatus != RecordingStatus.paused) return;
+      await _audioRecorder.resume();
+      _recordingStatus = RecordingStatus.recording;
+      _startTimer();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error resuming recording: $e');
+    }
   }
 
   /// Tags the speaker in real time without interrupting recording.
@@ -157,46 +195,55 @@ class AudioService extends ChangeNotifier {
   Future<RecordingSession?> stopRecording({String? sessionTitle}) async {
     if (_recordingStatus == RecordingStatus.idle) return null;
 
-    _ticker?.cancel();
-    final finalAudioPath = await _audioRecorder.stop() ?? _currentAudioPath;
-    final totalDuration = Duration(milliseconds: _elapsedMilliseconds);
+    try {
+      _ticker?.cancel();
+      final finalAudioPath = await _audioRecorder.stop() ?? _currentAudioPath;
+      final totalDuration = Duration(milliseconds: _elapsedMilliseconds);
 
-    final appDir = await getApplicationDocumentsDirectory();
-    final sessionDir = Directory(p.join(appDir.path, 'recordings'));
-    final jsonPath = p.join(sessionDir.path, '$_currentSessionId.json');
-    final csvPath = p.join(sessionDir.path, '$_currentSessionId.csv');
+      final appDir = await getApplicationDocumentsDirectory();
+      final sessionDir = Directory(p.join(appDir.path, 'recordings'));
+      final jsonPath = p.join(sessionDir.path, '$_currentSessionId.json');
+      final csvPath = p.join(sessionDir.path, '$_currentSessionId.csv');
 
-    final title = sessionTitle?.trim().isNotEmpty == true
-        ? sessionTitle!.trim()
-        : 'Meeting ${DateFormat('MMM dd, yyyy HH:mm').format(_sessionStartTime ?? DateTime.now())}';
+      final title = sessionTitle?.trim().isNotEmpty == true
+          ? sessionTitle!.trim()
+          : 'Meeting ${DateFormat('MMM dd, yyyy HH:mm').format(_sessionStartTime ?? DateTime.now())}';
 
-    final session = RecordingSession(
-      id: _currentSessionId!,
-      title: title,
-      audioPath: finalAudioPath!,
-      jsonPath: jsonPath,
-      csvPath: csvPath,
-      startTime: _sessionStartTime ?? DateTime.now(),
-      duration: totalDuration,
-      tags: List.from(_activeTags),
-    );
+      final session = RecordingSession(
+        id: _currentSessionId!,
+        title: title,
+        audioPath: finalAudioPath ?? _currentAudioPath!,
+        jsonPath: jsonPath,
+        csvPath: csvPath,
+        startTime: _sessionStartTime ?? DateTime.now(),
+        duration: totalDuration,
+        tags: List.from(_activeTags),
+      );
 
-    // Save JSON metadata
-    final jsonFile = File(jsonPath);
-    await jsonFile.writeAsString(
-      const JsonEncoder.withIndent('  ').convert(session.toJson()),
-    );
+      // Save JSON metadata
+      final jsonFile = File(jsonPath);
+      await jsonFile.writeAsString(
+        const JsonEncoder.withIndent('  ').convert(session.toJson()),
+      );
 
-    // Save CSV metadata
-    final csvFile = File(csvPath);
-    await csvFile.writeAsString(session.toCsv());
+      // Save CSV metadata
+      final csvFile = File(csvPath);
+      await csvFile.writeAsString(session.toCsv());
 
-    _recordingStatus = RecordingStatus.idle;
-    _activeSpeaker = null;
-    _elapsedMilliseconds = 0;
-    notifyListeners();
+      _recordingStatus = RecordingStatus.idle;
+      _activeSpeaker = null;
+      _elapsedMilliseconds = 0;
+      notifyListeners();
 
-    return session;
+      return session;
+    } catch (e, stack) {
+      debugPrint('Error stopping recording: $e\n$stack');
+      _recordingStatus = RecordingStatus.idle;
+      _activeSpeaker = null;
+      _elapsedMilliseconds = 0;
+      notifyListeners();
+      return null;
+    }
   }
 
   void _startTimer() {
@@ -214,6 +261,19 @@ class AudioService extends ChangeNotifier {
 
   Future<void> playSession(RecordingSession session) async {
     try {
+      // Configure audio context for optimal speaker playback on Android
+      await _audioPlayer.setAudioContext(
+        AudioContext(
+          android: const AudioContextAndroid(
+            isSpeakerphoneOn: true,
+            stayAwake: true,
+            contentType: AndroidContentType.music,
+            usageType: AndroidUsageType.media,
+            audioFocus: AndroidAudioFocus.gain,
+          ),
+        ),
+      );
+
       if (_currentlyPlayingPath == session.audioPath &&
           _playerState == PlayerState.paused) {
         await _audioPlayer.resume();
@@ -229,22 +289,38 @@ class AudioService extends ChangeNotifier {
   }
 
   Future<void> pausePlayback() async {
-    await _audioPlayer.pause();
+    try {
+      await _audioPlayer.pause();
+    } catch (e) {
+      debugPrint('Error pausing playback: $e');
+    }
   }
 
   Future<void> resumePlayback() async {
-    await _audioPlayer.resume();
+    try {
+      await _audioPlayer.resume();
+    } catch (e) {
+      debugPrint('Error resuming playback: $e');
+    }
   }
 
   Future<void> stopPlayback() async {
-    await _audioPlayer.stop();
-    _playbackPosition = Duration.zero;
-    _currentlyPlayingPath = null;
-    notifyListeners();
+    try {
+      await _audioPlayer.stop();
+      _playbackPosition = Duration.zero;
+      _currentlyPlayingPath = null;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error stopping playback: $e');
+    }
   }
 
   Future<void> seekPlayback(Duration targetPosition) async {
-    await _audioPlayer.seek(targetPosition);
+    try {
+      await _audioPlayer.seek(targetPosition);
+    } catch (e) {
+      debugPrint('Error seeking playback: $e');
+    }
   }
 
   /// Determines the active speaker at the given playback position.
@@ -268,58 +344,67 @@ class AudioService extends ChangeNotifier {
 
   /// Loads all saved recording sessions from device storage.
   Future<List<RecordingSession>> loadAllSessions() async {
-    final appDir = await getApplicationDocumentsDirectory();
-    final sessionDir = Directory(p.join(appDir.path, 'recordings'));
-    if (!await sessionDir.exists()) {
-      return [];
-    }
+    try {
+      final appDir = await getApplicationDocumentsDirectory();
+      final sessionDir = Directory(p.join(appDir.path, 'recordings'));
+      if (!await sessionDir.exists()) {
+        return [];
+      }
 
-    final List<RecordingSession> sessions = [];
-    final files = sessionDir.listSync();
+      final List<RecordingSession> sessions = [];
+      final files = sessionDir.listSync();
 
-    for (final file in files) {
-      if (file is File && file.path.endsWith('.json')) {
-        try {
-          final content = await file.readAsString();
-          final map = jsonDecode(content) as Map<String, dynamic>;
-          final session = RecordingSession.fromJson(map);
-          // Confirm that audio file also exists
-          if (File(session.audioPath).existsSync()) {
-            sessions.add(session);
+      for (final file in files) {
+        if (file is File && file.path.endsWith('.json')) {
+          try {
+            final content = await file.readAsString();
+            final map = jsonDecode(content) as Map<String, dynamic>;
+            final session = RecordingSession.fromJson(map);
+            // Confirm that audio file also exists
+            if (File(session.audioPath).existsSync()) {
+              sessions.add(session);
+            }
+          } catch (e) {
+            debugPrint('Failed to parse session file ${file.path}: $e');
           }
-        } catch (e) {
-          debugPrint('Failed to parse session file ${file.path}: $e');
         }
       }
-    }
 
-    // Sort by most recent start time
-    sessions.sort((a, b) => b.startTime.compareTo(a.startTime));
-    return sessions;
+      // Sort by most recent start time
+      sessions.sort((a, b) => b.startTime.compareTo(a.startTime));
+      return sessions;
+    } catch (e) {
+      debugPrint('Error loading sessions: $e');
+      return [];
+    }
   }
 
   /// Deletes audio and metadata files for a session.
   Future<void> deleteSession(RecordingSession session) async {
-    if (_currentlyPlayingPath == session.audioPath) {
-      await stopPlayback();
-    }
+    try {
+      if (_currentlyPlayingPath == session.audioPath) {
+        await stopPlayback();
+      }
 
-    final audioFile = File(session.audioPath);
-    if (await audioFile.exists()) {
-      await audioFile.delete();
-    }
+      final audioFile = File(session.audioPath);
+      if (await audioFile.exists()) {
+        await audioFile.delete();
+      }
 
-    final jsonFile = File(session.jsonPath);
-    if (await jsonFile.exists()) {
-      await jsonFile.delete();
-    }
+      final jsonFile = File(session.jsonPath);
+      if (await jsonFile.exists()) {
+        await jsonFile.delete();
+      }
 
-    final csvFile = File(session.csvPath);
-    if (await csvFile.exists()) {
-      await csvFile.delete();
-    }
+      final csvFile = File(session.csvPath);
+      if (await csvFile.exists()) {
+        await csvFile.delete();
+      }
 
-    notifyListeners();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error deleting session: $e');
+    }
   }
 
   @override

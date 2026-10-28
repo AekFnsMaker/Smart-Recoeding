@@ -6,6 +6,11 @@ import 'services/audio_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    debugPrint('FlutterError: ${details.exception}');
+  };
+
   // Set preferred orientations and system UI overlay style
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
