@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 /// Represents a single speaker attribution logged at a specific audio timestamp.
 class SpeakerTag {
   final String speakerName;
