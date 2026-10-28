@@ -37,26 +37,7 @@ jobs:
 
       - name: Setup Android Project Files
         run: |
-          rm -rf android
-          flutter create . --org com.example --project-name speaker_tag_recorder --platforms=android
-          
           python3 -c '
-          # 1. Insert audio and storage permissions into AndroidManifest.xml
-          with open("android/app/src/main/AndroidManifest.xml", "r") as f:
-              content = f.read()
-          perms = """
-              <uses-permission android:name="android.permission.RECORD_AUDIO" />
-              <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-              <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-              <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
-              <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-              <supports-screens android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" android:xlargeScreens="true" android:anyDensity="true" />
-          """
-          content = content.replace("<application", perms + "\n    <application", 1)
-          with open("android/app/src/main/AndroidManifest.xml", "w") as f:
-              f.write(content)
-
-          # 2. Set minSdk to 23 in android/app/build.gradle for record package compatibility
           with open("android/app/build.gradle", "r") as f:
               bg = f.read()
           bg = bg.replace("minSdk = flutter.minSdkVersion", "minSdk = 23")

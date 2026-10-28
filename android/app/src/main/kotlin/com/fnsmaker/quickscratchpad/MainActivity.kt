@@ -1,4 +1,4 @@
-package com.example.speaker_tag_recorder
+package com.fnsmaker.quickscratchpad
 
 import io.flutter.embedding.android.FlutterActivity
 

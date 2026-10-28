@@ -18,7 +18,7 @@
         android:anyDensity="true" />
 
     <application
-        android:label="SpeakerTagRecorder"
+        android:label="Quick Scratchpad"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
