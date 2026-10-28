@@ -1,0 +1,100 @@
+[        ] Downloading https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/abi-tools-api/2.2.20/abi-tools-api-2.2.20.jar to /home/runner/.gradle/.tmp/gradle_download10638709115945097353bin
+[        ] Downloading https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-util-klib-metadata/2.2.20/kotlin-util-klib-metadata-2.2.20.jar to /home/runner/.gradle/.tmp/gradle_download14143592235486898977bin
+[  +99 ms] Downloading https://repo.maven.apache.org/maven2/io/grpc/grpc-context/1.69.1/grpc-context-1.69.1.jar to /home/runner/.gradle/.tmp/gradle_download7056497763801620097bin
+[        ] Downloading https://repo.maven.apache.org/maven2/io/grpc/grpc-protobuf-lite/1.69.1/grpc-protobuf-lite-1.69.1.jar to /home/runner/.gradle/.tmp/gradle_download2575723257294935275bin
+[        ] Downloading https://repo.maven.apache.org/maven2/io/grpc/grpc-api/1.69.1/grpc-api-1.69.1.jar to /home/runner/.gradle/.tmp/gradle_download12502340073572210597bin
+[        ] Downloading https://repo.maven.apache.org/maven2/com/google/guava/guava/33.3.1-jre/guava-33.3.1-jre.jar to /home/runner/.gradle/.tmp/gradle_download10964813191134733417bin
+[        ] Downloading https://repo.maven.apache.org/maven2/org/bouncycastle/bcutil-jdk18on/1.79/bcutil-jdk18on-1.79.jar to /home/runner/.gradle/.tmp/gradle_download3219080102145463770bin
+[        ] Downloading https://dl.google.com/dl/android/maven2/com/android/signflinger/8.12.3/signflinger-8.12.3.jar to /home/runner/.gradle/.tmp/gradle_download13633364103622779391bin
+[        ] Downloading https://repo.maven.apache.org/maven2/org/bouncycastle/bcprov-jdk18on/1.79/bcprov-jdk18on-1.79.jar to /home/runner/.gradle/.tmp/gradle_download12590364132924112826bin
+[        ] Downloading https://dl.google.com/dl/android/maven2/com/android/zipflinger/8.12.3/zipflinger-8.12.3.jar to /home/runner/.gradle/.tmp/gradle_download171672881203560535bin
+[        ] Downloading https://dl.google.com/dl/android/maven2/com/android/tools/annotations/31.12.3/annotations-31.12.3.jar to /home/runner/.gradle/.tmp/gradle_download14445545441411929104bin
+[  +98 ms] Downloading https://repo.maven.apache.org/maven2/com/google/errorprone/error_prone_annotations/2.30.0/error_prone_annotations-2.30.0.jar to /home/runner/.gradle/.tmp/gradle_download1402540629795485605bin
+[        ] Downloading https://repo.maven.apache.org/maven2/com/google/j2objc/j2objc-annotations/3.0.0/j2objc-annotations-3.0.0.jar to /home/runner/.gradle/.tmp/gradle_download17389479370151356654bin
+[        ] Downloading https://repo.maven.apache.org/maven2/org/codehaus/mojo/animal-sniffer-annotations/1.24/animal-sniffer-annotations-1.24.jar to /home/runner/.gradle/.tmp/gradle_download15225702319777545344bin
+[        ] Downloading https://repo.maven.apache.org/maven2/io/netty/netty-codec-http2/4.1.110.Final/netty-codec-http2-4.1.110.Final.jar to /home/runner/.gradle/.tmp/gradle_download4003505690960220094bin
+[        ] Downloading https://repo.maven.apache.org/maven2/io/perfmark/perfmark-api/0.27.0/perfmark-api-0.27.0.jar to /home/runner/.gradle/.tmp/gradle_download11219797806876065226bin
+[        ] Downloading https://repo.maven.apache.org/maven2/io/netty/netty-codec-http/4.1.110.Final/netty-codec-http-4.1.110.Final.jar to /home/runner/.gradle/.tmp/gradle_download9458053353917823268bin
+[        ] Downloading https://repo.maven.apache.org/maven2/io/netty/netty-handler-proxy/4.1.110.Final/netty-handler-proxy-4.1.110.Final.jar to /home/runner/.gradle/.tmp/gradle_download17146896654135819033bin
+[        ] Downloading https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-unix-common/4.1.110.Final/netty-transport-native-unix-common-4.1.110.Final.jar to /home/runner/.gradle/.tmp/gradle_download9985568311730072315bin
+[        ] Downloading https://repo.maven.apache.org/maven2/io/netty/netty-handler/4.1.110.Final/netty-handler-4.1.110.Final.jar to /home/runner/.gradle/.tmp/gradle_download17907358526639420031bin
+[  +99 ms] Downloading https://dl.google.com/dl/android/maven2/com/android/tools/build/apksig/8.12.3/apksig-8.12.3.jar to /home/runner/.gradle/.tmp/gradle_download1716156615614686881bin
+[        ] Downloading https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-native-utils/2.2.20/kotlin-native-utils-2.2.20.jar to /home/runner/.gradle/.tmp/gradle_download11804362641351395963bin
+[        ] Downloading https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-gradle-plugin-annotations/2.2.20/kotlin-gradle-plugin-annotations-2.2.20.jar to /home/runner/.gradle/.tmp/gradle_download16088324111453300173bin
+[        ] Downloading https://repo.maven.apache.org/maven2/org/checkerframework/checker-qual/3.43.0/checker-qual-3.43.0.jar to /home/runner/.gradle/.tmp/gradle_download17776488792007663525bin
+[        ] Downloading https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-build-tools-api/2.2.20/kotlin-build-tools-api-2.2.20.jar to /home/runner/.gradle/.tmp/gradle_download17303073978787095883bin
+[        ] Downloading https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-util-klib/2.2.20/kotlin-util-klib-2.2.20.jar to /home/runner/.gradle/.tmp/gradle_download10119898594309033501bin
+[        ] Downloading https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-tooling-core/2.2.20/kotlin-tooling-core-2.2.20.jar to /home/runner/.gradle/.tmp/gradle_download11426372920411221694bin
+[        ] Downloading https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-util-io/2.2.20/kotlin-util-io-2.2.20.jar to /home/runner/.gradle/.tmp/gradle_download3132449111853221216bin
+[        ] Downloading https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-daemon-client/2.2.20/kotlin-daemon-client-2.2.20.jar to /home/runner/.gradle/.tmp/gradle_download15450387104898029525bin
+[  +99 ms] Downloading https://repo.maven.apache.org/maven2/io/netty/netty-codec/4.1.110.Final/netty-codec-4.1.110.Final.jar to /home/runner/.gradle/.tmp/gradle_download16867944750716234244bin
+[        ] Downloading https://repo.maven.apache.org/maven2/com/google/guava/failureaccess/1.0.2/failureaccess-1.0.2.jar to /home/runner/.gradle/.tmp/gradle_download5503665049498887126bin
+[        ] Downloading https://repo.maven.apache.org/maven2/io/netty/netty-transport/4.1.110.Final/netty-transport-4.1.110.Final.jar to /home/runner/.gradle/.tmp/gradle_download4585675537735456658bin
+[        ] Downloading https://repo.maven.apache.org/maven2/io/netty/netty-codec-socks/4.1.110.Final/netty-codec-socks-4.1.110.Final.jar to /home/runner/.gradle/.tmp/gradle_download17122445203419293703bin
+[        ] Downloading https://repo.maven.apache.org/maven2/io/netty/netty-resolver/4.1.110.Final/netty-resolver-4.1.110.Final.jar to /home/runner/.gradle/.tmp/gradle_download4559763724938699110bin
+[        ] Downloading https://repo.maven.apache.org/maven2/io/netty/netty-common/4.1.110.Final/netty-common-4.1.110.Final.jar to /home/runner/.gradle/.tmp/gradle_download15179438421815671773bin
+[        ] Downloading https://repo.maven.apache.org/maven2/io/netty/netty-buffer/4.1.110.Final/netty-buffer-4.1.110.Final.jar to /home/runner/.gradle/.tmp/gradle_download376637323477290226bin
+[+5300 ms] Compiling build file '/home/runner/.pub-cache/hosted/pub.dev/record_android-1.5.2/android/build.gradle' using BuildScriptTransformer.
+[        ] Using default execution profile
+[        ] Using Kotlin Gradle Plugin gradle76 variant
+[ +101 ms] Could not execute [class org.jetbrains.kotlin.gradle.plugin.statistics.KotlinBuildStatHandler.buildFinished]
+[        ] FAILURE: Build completed with 2 failures.
+[   +4 ms] 1: Task failed with an exception.
+[        ] -----------
+[        ] * Where:
+[        ] Build file '/home/runner/.pub-cache/hosted/pub.dev/record_android-1.5.2/android/build.gradle' line: 32
+[        ] * What went wrong:
+[        ] A problem occurred evaluating project ':record_android'.
+[        ] > Could not get unknown property 'flutter' for extension 'android' of type com.android.build.gradle.LibraryExtension.
+[        ] * Try:
+[        ] > Run with --debug option to get more log output.
+[        ] > Run with --scan to get full insights.
+[        ] > Get more help at https://help.gradle.org.
+[        ] * Exception is:
+[        ] org.gradle.api.GradleScriptException: A problem occurred evaluating project ':record_android'.
+[        ] 	at org.gradle.groovy.scripts.internal.DefaultScriptRunnerFactory$ScriptRunnerImpl.run(DefaultScriptRunnerFactory.java:93)
+[        ] 	at org.gradle.configuration.DefaultScriptPluginFactory$ScriptPluginImpl.lambda$apply$0(DefaultScriptPluginFactory.java:135)
+[        ] 	at org.gradle.configuration.ProjectScriptTarget.addConfiguration(ProjectScriptTarget.java:79)
+[        ] 	at org.gradle.configuration.DefaultScriptPluginFactory$ScriptPluginImpl.apply(DefaultScriptPluginFactory.java:138)
+[        ] 	at org.gradle.configuration.BuildOperationScriptPlugin$1.run(BuildOperationScriptPlugin.java:65)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:29)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:26)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:157)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:47)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationExecutor.run(DefaultBuildOperationExecutor.java:68)
+[        ] 	at org.gradle.configuration.BuildOperationScriptPlugin.lambda$apply$0(BuildOperationScriptPlugin.java:62)
+[        ] 	at org.gradle.configuration.internal.DefaultUserCodeApplicationContext.apply(DefaultUserCodeApplicationContext.java:44)
+[        ] 	at org.gradle.configuration.BuildOperationScriptPlugin.apply(BuildOperationScriptPlugin.java:62)
+[        ] 	at org.gradle.api.internal.project.DefaultProjectStateRegistry$ProjectStateImpl.lambda$applyToMutableState$1(DefaultProjectStateRegistry.java:395)
+[        ] 	at org.gradle.api.internal.project.DefaultProjectStateRegistry$ProjectStateImpl.fromMutableState(DefaultProjectStateRegistry.java:413)
+[        ] 	at org.gradle.api.internal.project.DefaultProjectStateRegistry$ProjectStateImpl.applyToMutableState(DefaultProjectStateRegistry.java:394)
+[        ] 	at org.gradle.configuration.project.BuildScriptProcessor.execute(BuildScriptProcessor.java:46)
+[        ] 	at org.gradle.configuration.project.BuildScriptProcessor.execute(BuildScriptProcessor.java:27)
+[        ] 	at org.gradle.configuration.project.ConfigureActionsProjectEvaluator.evaluate(ConfigureActionsProjectEvaluator.java:35)
+[        ] 	at org.gradle.configuration.project.LifecycleProjectEvaluator$EvaluateProject.lambda$run$0(LifecycleProjectEvaluator.java:109)
+[        ] 	at org.gradle.api.internal.project.DefaultProjectStateRegistry$ProjectStateImpl.lambda$applyToMutableState$1(DefaultProjectStateRegistry.java:395)
+[        ] 	at org.gradle.api.internal.project.DefaultProjectStateRegistry$ProjectStateImpl.lambda$fromMutableState$2(DefaultProjectStateRegistry.java:418)
+[        ] 	at org.gradle.internal.work.DefaultWorkerLeaseService.withReplacedLocks(DefaultWorkerLeaseService.java:360)
+[   +5 ms] 	at org.gradle.api.internal.project.DefaultProjectStateRegistry$ProjectStateImpl.fromMutableState(DefaultProjectStateRegistry.java:418)
+[        ] 	at org.gradle.api.internal.project.DefaultProjectStateRegistry$ProjectStateImpl.applyToMutableState(DefaultProjectStateRegistry.java:394)
+[        ] 	at org.gradle.configuration.project.LifecycleProjectEvaluator$EvaluateProject.run(LifecycleProjectEvaluator.java:100)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:29)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:26)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:157)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:47)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationExecutor.run(DefaultBuildOperationExecutor.java:68)
+[        ] 	at org.gradle.configuration.project.LifecycleProjectEvaluator.evaluate(LifecycleProjectEvaluator.java:72)
+[        ] 	at org.gradle.api.internal.project.DefaultProject.evaluate(DefaultProject.java:788)
+[        ] 	at org.gradle.api.internal.project.DefaultProject.evaluate(DefaultProject.java:156)
+[        ] 	at org.gradle.api.internal.project.ProjectLifecycleController.lambda$ensureSelfConfigured$2(ProjectLifecycleController.java:84)
+[        ] 	at org.gradle.internal.model.StateTransitionController.lambda$doTransition$14(StateTransitionController.java:255)
+[        ] 	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
+[        ] 	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:254)
+[        ] 	at org.gradle.internal.model.StateTransitionController.lambda$maybeTransitionIfNotCurrentlyTransitioning$10(StateTransitionController.java:199)
+[        ] 	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:34)
