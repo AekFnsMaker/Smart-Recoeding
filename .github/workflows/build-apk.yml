@@ -38,6 +38,11 @@ jobs:
           rm -rf android
           flutter create . --org com.example --project-name speaker_tag_recorder --platforms=android
           cp .github/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+          
+          # Set minimum SDK to 23 for record package compatibility
+          echo "flutter.minSdkVersion=23" >> android/local.properties
+          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 23/g' android/app/build.gradle
+          sed -i 's/minSdk flutter.minSdkVersion/minSdk 23/g' android/app/build.gradle
           sed -i 's/minSdkVersion = flutter.minSdkVersion/minSdkVersion = 23/g' android/app/build.gradle
           sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/g' android/app/build.gradle
 
@@ -48,7 +53,16 @@ jobs:
         run: flutter analyze --no-fatal-warnings || true
 
       - name: Build Release APK
-        run: flutter build apk --release
+        run: |
+          set +e
+          flutter build apk --release -v > build.log 2>&1
+          EXIT_CODE=$?
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "================ GRADLE BUILD FAILURE LOG ================"
+            grep -i -C 5 "Manifest merger failed" build.log || grep -i -C 5 "FAILURE:" build.log || tail -n 120 build.log
+            echo "=========================================================="
+            exit $EXIT_CODE
+          fi
 
       - name: Prepare Artifact
         run: |
