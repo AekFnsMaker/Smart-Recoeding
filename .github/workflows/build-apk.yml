@@ -48,13 +48,15 @@ jobs:
         run: flutter analyze --no-fatal-warnings || true
 
       - name: Build Release APK
-        run: |
-          flutter build apk --release --verbose 2>&1 | tee build.log || (echo "=== GRADLE FAILURE LOG ===" && grep -i -E "error|exception|failure" build.log -B 2 -A 5 | head -n 100 && exit 1)
+        run: flutter build apk --release
 
       - name: Prepare Artifact
         run: |
           mkdir -p output
-          find build -name "*.apk" -exec cp {} output/SpeakerTagRecorder.apk \;
+          APK_PATH=$(find build -type f -name "*release*.apk" | head -n 1)
+          echo "Found APK at: $APK_PATH"
+          cp "$APK_PATH" output/SpeakerTagRecorder.apk
+          ls -lh output/SpeakerTagRecorder.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
@@ -70,7 +72,7 @@ jobs:
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: "SpeakerTagRecorder v1.0.${{ github.run_number }}"
-          body: "Official Release APK for SpeakerTagRecorder. Real-time speaker tagging and audio timestamp seek playback."
+          body: "Official Release APK for SpeakerTagRecorder Android App. Real-time speaker tagging and audio timestamp seek playback."
           files: output/SpeakerTagRecorder.apk
           draft: false
           prerelease: false
