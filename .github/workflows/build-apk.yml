@@ -37,14 +37,29 @@ jobs:
         run: |
           rm -rf android
           flutter create . --org com.example --project-name speaker_tag_recorder --platforms=android
-          cp .github/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
           
-          # Set minimum SDK to 23 for record package compatibility
+          # Insert audio and storage permissions into standard generated manifest
+          python3 -c '
+          with open("android/app/src/main/AndroidManifest.xml", "r") as f:
+              content = f.read()
+          perms = """
+              <uses-permission android:name="android.permission.RECORD_AUDIO" />
+              <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+              <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+              <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+              <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+              <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+              <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+          """
+          content = content.replace("<application", perms + "\n    <application", 1)
+          with open("android/app/src/main/AndroidManifest.xml", "w") as f:
+              f.write(content)
+          '
+          
+          # Ensure minSdk is 23 for record package
           echo "flutter.minSdkVersion=23" >> android/local.properties
           sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 23/g' android/app/build.gradle
-          sed -i 's/minSdk flutter.minSdkVersion/minSdk 23/g' android/app/build.gradle
           sed -i 's/minSdkVersion = flutter.minSdkVersion/minSdkVersion = 23/g' android/app/build.gradle
-          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/g' android/app/build.gradle
 
       - name: Install Dependencies
         run: flutter pub get
@@ -58,11 +73,21 @@ jobs:
           flutter build apk --release -v > build.log 2>&1
           EXIT_CODE=$?
           if [ $EXIT_CODE -ne 0 ]; then
-            echo "================ GRADLE BUILD FAILURE LOG ================"
-            grep -i -C 5 "Manifest merger failed" build.log || grep -i -C 5 "FAILURE:" build.log || tail -n 120 build.log
-            echo "=========================================================="
+            echo "## Gradle Build Error Report" >> $GITHUB_STEP_SUMMARY
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            tail -n 120 build.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "=== LAST 100 LINES OF BUILD LOG ==="
+            tail -n 100 build.log
             exit $EXIT_CODE
           fi
+
+      - name: Upload Build Log on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-error-log
+          path: build.log
 
       - name: Prepare Artifact
         run: |
