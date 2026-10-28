@@ -69,6 +69,25 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      - name: Patch Legacy Plugins for Flutter 3.24 AGP 8 Compatibility
+        run: |
+          python3 -c '
+          import glob
+          for path in glob.glob("/home/runner/.pub-cache/hosted/pub.dev/*/android/build.gradle"):
+              try:
+                  with open(path, "r") as f:
+                      content = f.read()
+                  if "flutter.compileSdkVersion" in content or "flutter.minSdkVersion" in content:
+                      content = content.replace("flutter.compileSdkVersion", "34")
+                      content = content.replace("flutter.minSdkVersion", "23")
+                      content = content.replace("flutter.targetSdkVersion", "34")
+                      with open(path, "w") as f:
+                          f.write(content)
+                      print(f"Patched: {path}")
+              except Exception as e:
+                  print(f"Skip {path}: {e}")
+          '
+
       - name: Analyze Dart Code
         run: flutter analyze --no-fatal-warnings || true
 
