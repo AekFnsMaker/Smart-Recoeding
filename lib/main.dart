@@ -128,6 +128,10 @@ class _StarNoteScreenState extends State<StarNoteScreen>
   final List<List<DrawnStroke>> _undoStack = [];
   final List<List<DrawnStroke>> _redoStack = [];
   DrawnStroke? _activeStroke;
+  int? _activeDrawingPointerId;
+
+  // Palm Rejection: Default TRUE (Only accepts Stylus / S-Pen, completely blocks palm & fingers)
+  bool _stylusOnlyMode = true;
 
   // Pen Configuration
   PenTool _currentTool = PenTool.pen;
@@ -232,12 +236,37 @@ class _StarNoteScreenState extends State<StarNoteScreen>
     }
   }
 
-  // --- DIGITAL INK HANDWRITING GESTURE HANDLERS ---
+  // --- DIGITAL INK HANDWRITING GESTURE HANDLERS (WITH PALM REJECTION) ---
 
   void _onPointerDown(PointerDownEvent event) {
+    // 1. PALM REJECTION: If in Stylus-Only mode, ignore hand, fingers & resting palm
+    if (_stylusOnlyMode) {
+      if (event.kind != ui.PointerDeviceKind.stylus &&
+          event.kind != ui.PointerDeviceKind.invertedStylus) {
+        // Ignored: Palm or finger contact
+        return;
+      }
+    } else {
+      // Even in touch mode, reject large surface palm contacts
+      if (event.size > 0.28 || event.radiusMajor > 30.0) {
+        return;
+      }
+    }
+
+    // 2. SINGLE-POINTER INK LOCK: Prevent multi-touch palm interference
+    if (_activeDrawingPointerId != null) {
+      return;
+    }
+    _activeDrawingPointerId = event.pointer;
+
+    // 3. Auto-Eraser on S-Pen barrel button or Inverted Stylus tip
+    final isStylusButtonEraser = (event.buttons & 2) != 0 ||
+        event.kind == ui.PointerDeviceKind.invertedStylus;
+    final isEraser = _currentTool == PenTool.eraser || isStylusButtonEraser;
+
     final localPos = event.localPosition;
 
-    if (_currentTool == PenTool.eraser) {
+    if (isEraser) {
       _saveStateForUndo();
       _eraseAtPoint(localPos);
       return;
@@ -262,9 +291,16 @@ class _StarNoteScreenState extends State<StarNoteScreen>
   }
 
   void _onPointerMove(PointerMoveEvent event) {
+    // Only track the pointer that initiated the current stroke
+    if (_activeDrawingPointerId != event.pointer) return;
+
+    final isStylusButtonEraser = (event.buttons & 2) != 0 ||
+        event.kind == ui.PointerDeviceKind.invertedStylus;
+    final isEraser = _currentTool == PenTool.eraser || isStylusButtonEraser;
+
     final localPos = event.localPosition;
 
-    if (_currentTool == PenTool.eraser) {
+    if (isEraser) {
       _eraseAtPoint(localPos);
       return;
     }
@@ -277,13 +313,23 @@ class _StarNoteScreenState extends State<StarNoteScreen>
   }
 
   void _onPointerUp(PointerUpEvent event) {
-    if (_currentTool == PenTool.eraser) return;
+    if (_activeDrawingPointerId != event.pointer) return;
+    _activeDrawingPointerId = null;
 
     if (_activeStroke != null) {
       setState(() {
         _strokes.add(_activeStroke!);
         _activeStroke = null;
         _redoStack.clear();
+      });
+    }
+  }
+
+  void _onPointerCancel(PointerCancelEvent event) {
+    if (_activeDrawingPointerId == event.pointer) {
+      _activeDrawingPointerId = null;
+      setState(() {
+        _activeStroke = null;
       });
     }
   }
@@ -874,9 +920,13 @@ ${typedNotes.isNotEmpty ? '\nโน้ตพิมพ์เพิ่มเติ
             isActive: _currentTool == PenTool.eraser,
             onTap: () => setState(() => _currentTool = PenTool.eraser),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
+
+          // Palm Rejection Toggle Pill (Stylus Only vs Touch)
+          _buildPalmRejectionPill(),
+          const SizedBox(width: 12),
           const VerticalDivider(width: 1, thickness: 1, indent: 6, endIndent: 6),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
 
           // Color Palette (When using Pen)
           if (_currentTool == PenTool.pen) ...[
@@ -1046,6 +1096,91 @@ ${typedNotes.isNotEmpty ? '\nโน้ตพิมพ์เพิ่มเติ
     );
   }
 
+  /// Palm Rejection Toggle Pill Widget
+  Widget _buildPalmRejectionPill() {
+    return Tooltip(
+      message: _stylusOnlyMode
+          ? 'โหมดป้องกันฝ่ามือ (Stylus Only): วางมือเขียนได้ ไม่ติดรอยมือ'
+          : 'โหมดใช้นิ้วเขียน (Pen + Touch): อนุญาตให้ใช้นิ้วมือวาดเขียนได้',
+      child: InkWell(
+        onTap: () {
+          setState(() => _stylusOnlyMode = !_stylusOnlyMode);
+          HapticFeedback.mediumImpact();
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              duration: const Duration(milliseconds: 2200),
+              backgroundColor: _stylusOnlyMode
+                  ? const Color(0xFF0F766E) // Teal
+                  : const Color(0xFF334155),
+              content: Row(
+                children: [
+                  Icon(
+                    _stylusOnlyMode
+                        ? Icons.shield_rounded
+                        : Icons.touch_app_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      _stylusOnlyMode
+                          ? '🛡️ เปิด Palm Rejection: รับเฉพาะหัวปากกา Stylus สามารถวางมือเขียนบนจอได้เต็มที่'
+                          : '🖐️ โหมด Pen + Touch: อนุญาตให้ใช้นิ้วมือวาดเขียนได้ด้วย',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: _stylusOnlyMode
+                ? const Color(0xFF0D9488).withOpacity(0.18)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: _stylusOnlyMode
+                  ? const Color(0xFF0D9488)
+                  : (_isDarkPaper ? Colors.white24 : Colors.black26),
+              width: 1.4,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                _stylusOnlyMode
+                    ? Icons.shield_rounded
+                    : Icons.touch_app_rounded,
+                size: 15,
+                color: _stylusOnlyMode
+                    ? const Color(0xFF0D9488)
+                    : (_isDarkPaper ? Colors.white70 : const Color(0xFF475569)),
+              ),
+              const SizedBox(width: 5),
+              Text(
+                _stylusOnlyMode ? 'วางมือได้ (Stylus Only)' : 'นิ้วเขียนได้',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: _stylusOnlyMode
+                      ? const Color(0xFF0D9488)
+                      : (_isDarkPaper ? Colors.white70 : const Color(0xFF475569)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   /// StarNote Digital Ink Handwriting Canvas
   Widget _buildHandwritingCanvas() {
     final paperColor =
@@ -1059,6 +1194,7 @@ ${typedNotes.isNotEmpty ? '\nโน้ตพิมพ์เพิ่มเติ
         onPointerDown: _onPointerDown,
         onPointerMove: _onPointerMove,
         onPointerUp: _onPointerUp,
+        onPointerCancel: _onPointerCancel,
         child: CustomPaint(
           size: Size.infinite,
           painter: StarNoteCanvasPainter(
